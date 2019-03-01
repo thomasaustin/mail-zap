@@ -7,7 +7,10 @@
 	"author": {
 		"name": "Thomas Austin"
 	},
-	"repository": "",
+	"repository": {
+		"type": "git",
+		"url": "https://github.com/thomasaustin/mail-zap"
+	},
 	"engines": {
 		"vscode": "^1.25.0"
 	},
@@ -21,6 +24,11 @@
 		"HTML"
 	],
 	"icon": "icon.png",
+	"galleryBanner": {
+		"color": "#000000",
+		"theme": "dark"
+	},
+	"license": "MIT",
 	"activationEvents": [
 		"onCommand:extension.mailzapcreate",
 		"onCommand:extension.mailzapupdate"
