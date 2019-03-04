@@ -30,8 +30,7 @@
 	},
 	"license": "MIT",
 	"activationEvents": [
-		"onCommand:extension.mailzapcreate",
-		"onCommand:extension.mailzapupdate"
+		"*"
 	],
 	"main": "./out/extension.js",
 	"contributes": {
