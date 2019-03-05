@@ -2,116 +2,94 @@ import * as vscode from 'vscode';
 import * as fs from 'fs';
 import axios from 'axios';
 
-export function activate(context: vscode.ExtensionContext) {
+let config_output;
+const init_config_output = () => {
+	config_output = JSON.parse(fs.readFileSync(vscode.window.activeTextEditor.document.uri.fsPath.match(/.*\//g) + "config.json", "utf8"));
+}
 
-	// create email command
-	let create = vscode.commands.registerCommand('extension.mailzapcreate', () => {
+let text_output;
+const init_text_output = () => {
+	text_output = vscode.window.activeTextEditor.document.getText(vscode.window.activeTextEditor.selections[10000000]);
+}
 
-		// read data in config file
-		var file_path = vscode.window.activeTextEditor.document.uri.fsPath
-		var folder_path = file_path.match(/.*\//g);
-		var config_data = JSON.parse(fs.readFileSync(folder_path + "config.json", "utf8"));
+const createEmail = () => {
 
-		// set api variables
-		var auth_sitename = config_data.authorization[0].sitename
-		var auth_username = config_data.authorization[0].username
-		var auth_password = config_data.authorization[0].password
-		var access_token = 'Basic ' + Buffer.from(auth_sitename + '\\' + auth_username + ':' + auth_password).toString('base64')
-		var email_name = config_data.email[0].name
-		var email_subject = config_data.email[0].subject
+	init_config_output();
+	
+	init_text_output();
 
-		// select all text in active document
-		var editor = vscode.window.activeTextEditor;
-		var selection = editor.selections[10000000]
-		var email_html = editor.document.getText(selection);
-
-		// create email via api
-		if (!auth_sitename || !auth_username || !auth_password) {
-			vscode.window.showErrorMessage('Error! Authorization credentials have not been defined in the config file.')
-		} else if (!email_name) {
-			vscode.window.showErrorMessage('Error! An email name has not been defined in the config file.')
-		} else {
-			axios.post('https://secure.p02.eloqua.com/api/REST/2.0/assets/email', {
-					"name": email_name,
-					"subject": email_subject,
-					"htmlContent": {
-						"type": "RawHtmlContent",
-						"html": email_html
-					}
-				}, {
-					headers: {
-						Authorization: access_token
-					}
-				})
-				.then(function (response) {
-					console.log(response.data);
-					vscode.window.showInformationMessage('Success! This email has been created.');
-					// update email id in config file
-					config_data.email[0].id = response.data.id;
-					fs.writeFileSync(folder_path + "config.json", JSON.stringify(config_data, null, 2));
-				})
-				.catch(function (error) {
-					console.log(error.response.data);
-				});
+	if (!config_output.authorization[0].sitename || !config_output.authorization[0].username || !config_output.authorization[0].password) {
+		vscode.window.showErrorMessage('Error! Authorization credentials have not been defined in the config file.')
+		return;
+	} else if (!config_output.email[0].name) {
+		vscode.window.showErrorMessage('Error! Email name has not been defined in the config file.')
+		return;
+	}
+	axios.post('https://secure.p02.eloqua.com/api/REST/2.0/assets/email', {
+		"name": config_output.email[0].name,
+		"subject": config_output.email[0].subject,
+		"htmlContent": {
+			"type": "RawHtmlContent",
+			"html": text_output
 		}
-
-	});
-	context.subscriptions.push(create);
-
-	// update email command
-	let update = vscode.commands.registerCommand('extension.mailzapupdate', () => {
-
-		// read data in config file
-		var file_path = vscode.window.activeTextEditor.document.uri.fsPath
-		var folder_path = file_path.match(/.*\//g);
-		var config_data = JSON.parse(fs.readFileSync(folder_path + "config.json", "utf8"));
-
-		// set api variables
-		var auth_sitename = config_data.authorization[0].sitename
-		var auth_username = config_data.authorization[0].username
-		var auth_password = config_data.authorization[0].password
-		var access_token = 'Basic ' + Buffer.from(auth_sitename + '\\' + auth_username + ':' + auth_password).toString('base64')
-		var email_id = config_data.email[0].id
-		var email_name = config_data.email[0].name
-		var email_subject = config_data.email[0].subject
-
-		// select all text in active document
-		var editor = vscode.window.activeTextEditor;
-		var selection = editor.selections[10000000]
-		var email_html = editor.document.getText(selection);
-
-		// update email via api
-		if (!auth_sitename || !auth_username || !auth_password) {
-			vscode.window.showErrorMessage('Error! Authorization credentials have not been defined in the config file.')
-		} else if (!email_id) {
-			vscode.window.showErrorMessage('Error! An email id has not been defined in the config file.')
-		} else if (!email_name) {
-			vscode.window.showErrorMessage('Error! An email name has not been defined in the config file.')
-		} else {
-			axios.put('https://secure.p02.eloqua.com/api/REST/2.0/assets/email/' + email_id, {
-					"id": email_id,
-					"name": email_name,
-					"subject": email_subject,
-					"htmlContent": {
-						"type": "RawHtmlContent",
-						"html": email_html
-					}
-				}, {
-					headers: {
-						Authorization: access_token
-					}
-				})
-				.then(function (response) {
-					console.log(response.data);
-					vscode.window.showInformationMessage('Success! This email has been updated.')
-				})
-				.catch(function (error) {
-					console.log(error.response.data);
-				})
-		}
-
-	});
-	context.subscriptions.push(update);
+		}, {
+			headers: {
+				Authorization: 'Basic ' + Buffer.from(config_output.authorization[0].sitename + '\\' + config_output.authorization[0].username + ':' + config_output.authorization[0].password).toString('base64')
+			}
+		})
+		.then(function (response) {
+			console.log(response.data);
+			vscode.window.showInformationMessage('Success! This email has been created.');
+			config_output.email[0].id = response.data.id;
+			fs.writeFileSync(vscode.window.activeTextEditor.document.uri.fsPath.match(/.*\//g) + "config.json", JSON.stringify(config_output, null, 2));
+		})
+		.catch(function (error) {
+			console.log(error.response.data);
+		});
 
 }
+
+const updateEmail = () => {
+
+	init_config_output();
+	init_text_output();
+
+	if (!config_output.authorization[0].sitename || !config_output.authorization[0].username || !config_output.authorization[0].password) {
+		vscode.window.showErrorMessage('Error! Authorization credentials have not been defined in the config file.')
+		return;
+	} else if (!config_output.email[0].name) {
+		vscode.window.showErrorMessage('Error! Email name has not been defined in the config file.')
+		return;
+	} else if (!config_output.email[0].id) {
+		vscode.window.showErrorMessage('Error! Email id has not been defined in the config file.')
+		return;
+	}
+	axios.put('https://secure.p02.eloqua.com/api/REST/2.0/assets/email/' + config_output.email[0].id, {
+		"id": config_output.email[0].id,
+		"name": config_output.email[0].name,
+		"subject": config_output.email[0].subject,
+		"htmlContent": {
+			"type": "RawHtmlContent",
+			"html": text_output
+		}
+		}, {
+			headers: {
+				Authorization: 'Basic ' + Buffer.from(config_output.authorization[0].sitename + '\\' + config_output.authorization[0].username + ':' + config_output.authorization[0].password).toString('base64')
+			}
+		})
+		.then(function (response) {
+			console.log(response.data);
+			vscode.window.showInformationMessage('Success! This email has been updated.')
+		})
+		.catch(function (error) {
+			console.log(error.response.data);
+		});
+		
+}
+
+export function activate(context: vscode.ExtensionContext) {
+	context.subscriptions.push(vscode.commands.registerCommand('extension.mailzapcreate', createEmail));
+	context.subscriptions.push(vscode.commands.registerCommand('extension.mailzapupdate', updateEmail));
+}
+
 export function deactivate() {}
