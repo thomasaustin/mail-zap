@@ -36,6 +36,10 @@
 	"contributes": {
 		"commands": [
 			{
+				"command": "extension.mailzapconfig",
+				"title": "Mail Zap: Create Config"
+			},
+			{
 				"command": "extension.mailzapcreate",
 				"title": "Mail Zap: Create Email"
 			},

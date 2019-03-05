@@ -7,17 +7,25 @@ const init_config_output = () => {
 	config_output = JSON.parse(fs.readFileSync(vscode.window.activeTextEditor.document.uri.fsPath.match(/.*\//g) + "config.json", "utf8"));
 }
 
-let text_output;
-const init_text_output = () => {
-	text_output = vscode.window.activeTextEditor.document.getText(vscode.window.activeTextEditor.selections[10000000]);
+const create_config = () => {
+	let config = {
+		authorization: [{
+			sitename: "",
+			username: "",
+			password: ""
+		}],
+		email: [{
+			id: "",
+			name: "",
+			subject: ""
+		}]
+	};
+	fs.writeFileSync(vscode.window.activeTextEditor.document.uri.fsPath.match(/.*\//g) + "config.json", JSON.stringify(config, null, 2));
+	vscode.window.showInformationMessage('Success! A config file has been created.');
 }
 
-const createEmail = () => {
-
-	init_config_output();
-	
-	init_text_output();
-
+const create_email = () => {
+	init_config_output()
 	if (!config_output.authorization[0].sitename || !config_output.authorization[0].username || !config_output.authorization[0].password) {
 		vscode.window.showErrorMessage('Error! Authorization credentials have not been defined in the config file.')
 		return;
@@ -30,30 +38,24 @@ const createEmail = () => {
 		"subject": config_output.email[0].subject,
 		"htmlContent": {
 			"type": "RawHtmlContent",
-			"html": text_output
+			"html": vscode.window.activeTextEditor.document.getText(vscode.window.activeTextEditor.selections[10000000])
 		}
-		}, {
-			headers: {
-				Authorization: 'Basic ' + Buffer.from(config_output.authorization[0].sitename + '\\' + config_output.authorization[0].username + ':' + config_output.authorization[0].password).toString('base64')
-			}
-		})
-		.then(function (response) {
-			console.log(response.data);
-			vscode.window.showInformationMessage('Success! This email has been created.');
-			config_output.email[0].id = response.data.id;
-			fs.writeFileSync(vscode.window.activeTextEditor.document.uri.fsPath.match(/.*\//g) + "config.json", JSON.stringify(config_output, null, 2));
-		})
-		.catch(function (error) {
-			console.log(error.response.data);
-		});
-
+	}, {
+		headers: {
+			Authorization: 'Basic ' + Buffer.from(config_output.authorization[0].sitename + '\\' + config_output.authorization[0].username + ':' + config_output.authorization[0].password).toString('base64')
+		}
+	}).then(function (response) {
+		console.log(response.data);
+		config_output.email[0].id = response.data.id;
+		fs.writeFileSync(vscode.window.activeTextEditor.document.uri.fsPath.match(/.*\//g) + "config.json", JSON.stringify(config_output, null, 2));
+		vscode.window.showInformationMessage('Success! This email has been created.');
+	}).catch(function (error) {
+		console.log(error.response.data);
+	});
 }
 
-const updateEmail = () => {
-
+const update_email = () => {
 	init_config_output();
-	init_text_output();
-
 	if (!config_output.authorization[0].sitename || !config_output.authorization[0].username || !config_output.authorization[0].password) {
 		vscode.window.showErrorMessage('Error! Authorization credentials have not been defined in the config file.')
 		return;
@@ -70,26 +72,24 @@ const updateEmail = () => {
 		"subject": config_output.email[0].subject,
 		"htmlContent": {
 			"type": "RawHtmlContent",
-			"html": text_output
+			"html": vscode.window.activeTextEditor.document.getText(vscode.window.activeTextEditor.selections[10000000])
 		}
-		}, {
-			headers: {
-				Authorization: 'Basic ' + Buffer.from(config_output.authorization[0].sitename + '\\' + config_output.authorization[0].username + ':' + config_output.authorization[0].password).toString('base64')
-			}
-		})
-		.then(function (response) {
-			console.log(response.data);
-			vscode.window.showInformationMessage('Success! This email has been updated.')
-		})
-		.catch(function (error) {
-			console.log(error.response.data);
-		});
-		
+	}, {
+		headers: {
+			Authorization: 'Basic ' + Buffer.from(config_output.authorization[0].sitename + '\\' + config_output.authorization[0].username + ':' + config_output.authorization[0].password).toString('base64')
+		}
+	}).then(function (response) {
+		console.log(response.data);
+		vscode.window.showInformationMessage('Success! This email has been updated.')
+	}).catch(function (error) {
+		console.log(error.response.data);
+	});
 }
 
 export function activate(context: vscode.ExtensionContext) {
-	context.subscriptions.push(vscode.commands.registerCommand('extension.mailzapcreate', createEmail));
-	context.subscriptions.push(vscode.commands.registerCommand('extension.mailzapupdate', updateEmail));
+	context.subscriptions.push(vscode.commands.registerCommand('extension.mailzapconfig', create_config));
+	context.subscriptions.push(vscode.commands.registerCommand('extension.mailzapcreate', create_email));
+	context.subscriptions.push(vscode.commands.registerCommand('extension.mailzapupdate', update_email));
 }
 
 export function deactivate() {}
