@@ -2,7 +2,7 @@
 	"name": "mail-zap",
 	"displayName": "Mail Zap",
 	"description": "Create and update Eloqua HTML emails within Visual Studio Code",
-	"version": "0.0.2",
+	"version": "0.0.3",
 	"publisher": "thomasaustin",
 	"author": {
 		"name": "Thomas Austin"
@@ -25,7 +25,7 @@
 	],
 	"icon": "icon.png",
 	"galleryBanner": {
-		"color": "#000000",
+		"color": "#222222",
 		"theme": "dark"
 	},
 	"license": "MIT",

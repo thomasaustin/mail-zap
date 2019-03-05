@@ -7,5 +7,5 @@
 		"sourceMap": true,
 		"rootDir": "src"
 	},
-	"exclude": ["node_modules", ".gitignore"]
+	"exclude": ["node_modules", ".gitignore", ".git"]
 }
