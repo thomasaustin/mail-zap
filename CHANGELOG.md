@@ -1,3 +1,6 @@
+## 0.0.6 (10/09/2019)
+* __Maintenance__: Fixed extension publishing bug
+
 ## 0.0.5 (10/09/2019)
 * __Maintenance__: Updated npm packages
 
