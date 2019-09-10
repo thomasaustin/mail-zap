@@ -2,7 +2,7 @@
 	"name": "mail-zap",
 	"displayName": "Mail Zap",
 	"description": "Create and update Eloqua HTML emails within Visual Studio Code",
-	"version": "0.0.4",
+	"version": "0.0.5",
 	"publisher": "thomasaustin",
 	"author": {
 		"name": "Thomas Austin"
@@ -56,11 +56,11 @@
 		"postinstall": "node ./node_modules/vscode/bin/install"
 	},
 	"devDependencies": {
-		"@types/node": "^11.10.5",
-		"typescript": "^3.3.3333",
-		"vscode": "^1.1.30"
+		"@types/node": "^11.13.20",
+		"typescript": "^3.6.2",
+		"vscode": "^1.1.36"
 	},
 	"dependencies": {
-		"axios": "^0.18.0"
+		"axios": "^0.18.1"
 	}
 }
